@@ -105,7 +105,13 @@ function SearchResults() {
                 {keyword ? `"${keyword}" 검색 결과` : '전체 채널'}
               </h1>
               <p className="text-gray-600 mt-2">
-                {loading ? '검색 중...' : `${filteredChannels.length}개의 채널을 찾았습니다`}
+                {loading ? (
+                    <span className="text-gray-600">검색 중...</span>
+                  ) : (
+                    <span className="text-lg font-bold text-purple-600">
+                      총 {filteredChannels.length}개의 채널
+                    </span>
+                  )}
               </p>
 
               {filteredChannels.length > 0 && !loading && (
