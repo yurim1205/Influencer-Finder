@@ -19,6 +19,7 @@ export interface Channel {
 export interface SearchResult {
   channels: Channel[];
   nextPageToken: string|null;
+  totalResults: number;
 }
 
 export interface YoutubeVideo {
@@ -75,7 +76,11 @@ export async function searchChannels(query: string, pageToken: string|null = nul
     (pageToken ? `&pageToken=${pageToken}` : '')
   );
   const data = await response.json();
-  return { items: data.items || [], nextPageToken: data.nextPageToken || null };
+  return { 
+    items: data.items || [],
+    nextPageToken: data.nextPageToken || null,
+    totalResults: data.pageInfo?.totalResults || 0,
+  };
 }
 
 // 채널 상세 정보 가져오기
@@ -171,7 +176,7 @@ export async function searchChannelsHybrid(
   pageToken: string|null = null
 ): Promise<SearchResult> {
   try {
-    const { items: channelSearchResults, nextPageToken } = await searchChannels(query, pageToken);
+    const { items: channelSearchResults, nextPageToken, totalResults } = await searchChannels(query, pageToken);
 
     // 영상 제목 검색
    const videoResults = await searchChannelsByVideo(query);
@@ -204,10 +209,11 @@ export async function searchChannelsHybrid(
     return {
       channels: Array.from(channelmap.values()).slice(0, 10),
       nextPageToken,
+      totalResults,
     };
   } catch (error) {
     console.error('하이브리드 검색 에러:', error);
-    return { channels: [], nextPageToken: null };
+    return { channels: [], nextPageToken: null, totalResults: 0 };
   }
 }
 

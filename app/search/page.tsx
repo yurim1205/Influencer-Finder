@@ -8,7 +8,7 @@ import {
 } from '@/lib/youtube';
 import { formatCount } from '@/lib/utils';
 
-const searchCache = new Map<string, { channels: Channel[]; nextPageToken: string | null }>();
+const searchCache = new Map<string, { channels: Channel[]; nextPageToken: string | null, totalResults: number }>();
 
 function SearchResults() {
   const searchParams = useSearchParams();
@@ -21,6 +21,7 @@ function SearchResults() {
   const [isOpen, setIsOpen] = useState(false);
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [totalResults, setTotalResults] = useState(0);
 
   useEffect(() => {
     async function fetchChannels() {
@@ -33,6 +34,7 @@ function SearchResults() {
         const cached = searchCache.get(keyword)!;
         setChannels(cached.channels);
         setNextPageToken(cached.nextPageToken);
+        setTotalResults(cached.totalResults);
         return;
       }
 
@@ -40,9 +42,14 @@ function SearchResults() {
 
       try {
         const result = await searchChannelsHybrid(keyword);
-        searchCache.set(keyword, result);
+        searchCache.set(keyword, { 
+          channels: result.channels, 
+          nextPageToken: result.nextPageToken, 
+          totalResults: result.totalResults 
+        });
         setChannels(result.channels);
         setNextPageToken(result.nextPageToken);
+        setTotalResults(result.totalResults);
       } catch (error) {
         console.error('채널 검색 에러:', error);
         setChannels([]);
@@ -63,7 +70,8 @@ function SearchResults() {
       const merged = [...channels, ...result.channels];
       setChannels(merged);
       setNextPageToken(result.nextPageToken);
-      searchCache.set(keyword, { channels: merged, nextPageToken: result.nextPageToken });
+      setTotalResults(result.totalResults);
+      searchCache.set(keyword, { channels: merged, nextPageToken: result.nextPageToken, totalResults: result.totalResults });
     } catch (error) {
       console.error('더 보기 에러:', error);
     } finally {
@@ -109,7 +117,7 @@ function SearchResults() {
                     <span className="text-gray-600">검색 중...</span>
                   ) : (
                     <span className="text-lg font-bold text-purple-600">
-                      총 {filteredChannels.length}개의 채널
+                      총 {totalResults.toLocaleString()}개의 채널
                     </span>
                   )}
               </p>
