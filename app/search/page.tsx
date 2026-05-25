@@ -128,7 +128,7 @@ function SearchResults() {
                   onClick={() => setIsOpen(!isOpen)}
                   className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-purple-200 rounded-xl font-semibold text-gray-600 flex items-center gap-2 shadow-sm"
                 >
-                  {sortType === 'default' ? '기본 순서' : sortType === 'subscribers' ? '구독자 많은 순' : '최신순'}
+                  {sortType === 'default' ? '관련도순' : sortType === 'subscribers' ? '구독자 많은 순' : '최신순'}
                   <span>{isOpen ? '▲' : '▼'}</span>
                 </button>
 
@@ -138,7 +138,7 @@ function SearchResults() {
                       onClick={() => { setSortType('default'); setIsOpen(false); }}
                       className="w-full px-4 py-3 text-left text-sm hover:bg-purple-50 rounded-t-xl"
                     >
-                      기본 순서
+                      관련도순
                     </button>
 
                     <button
