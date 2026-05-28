@@ -72,7 +72,7 @@ export async function searchChannels(query: string, pageToken: string|null = nul
   const response = await fetch(
     `${YOUTUBE_API_BASE_URL}/search?` +
     `part=snippet&type=channel&q=${encodeURIComponent(query)}&` +
-    `maxResults=10&key=${YOUTUBE_API_KEY}` +
+    `maxResults=12&key=${YOUTUBE_API_KEY}` +
     (pageToken ? `&pageToken=${pageToken}` : '')
   );
   const data = await response.json();
@@ -124,7 +124,7 @@ export async function searchChannelsByVideo(query: string) {
     const response = await fetch(
       `${YOUTUBE_API_BASE_URL}/search?` +
       `part=snippet&type=video&q=${encodeURIComponent(query)}&` +
-      `maxResults=10&key=${YOUTUBE_API_KEY}`
+      `maxResults=12&key=${YOUTUBE_API_KEY}`
     );
 
     if (!response.ok) {

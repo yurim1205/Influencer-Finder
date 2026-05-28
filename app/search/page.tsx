@@ -164,11 +164,14 @@ function SearchResults() {
 
         {/* 로딩 중 */}
         {loading && channels.length === 0 && (
-          <div className="text-center py-20">
-            <div className="text-4xl mb-4">🔍</div>
-            <p className="text-xl text-gray-600">채널을 검색하는 중...</p>
-          </div>
-        )}
+  <div className="text-center py-20">
+    <div className="flex flex-col items-center gap-4">
+      <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
+      <p className="text-xl text-gray-600">채널을 검색하는 중...</p>
+    </div>
+  </div>
+)}
+
 
                 {/* 검색 결과가 없을 때 */}
                 {!loading && keyword && filteredChannels.length === 0 && (
@@ -252,19 +255,25 @@ function SearchResults() {
 
           { /* 페이지네이션 더보기 버튼 */}
           {nextPageToken && !loading && (
-            <div className="flex justify-center mt-10">
-              <button
-                onClick={handleLoadMore}
-                disabled={loadingMore}
-                className="px-8 py-3 bg-white/80 backdrop-blur-sm border border-gray-200 text-purple-600 font-semibold rounded-2xl 
-                hover:bg-purple-50 disabled:opacity-50 transition-all
-                shadow-lg shadow-purple-500/30
-                "
-              >
-                {loadingMore ? '불러오는 중...' : '더 보기'}
-              </button>
-            </div>
-          )}
+  <div className="flex justify-center mt-10">
+    {loadingMore ? (
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
+        <p className="text-sm text-gray-500">채널을 불러오는 중...</p>
+      </div>
+    ) : (
+      <button
+        onClick={handleLoadMore}
+        disabled={loadingMore}
+        className="px-8 py-3 bg-white/80 backdrop-blur-sm border border-gray-200 text-purple-600 font-semibold rounded-2xl 
+        hover:bg-purple-50 disabled:opacity-50 transition-all
+        shadow-lg shadow-purple-500/30"
+      >
+        더 보기
+      </button>
+    )}
+  </div>
+)}
           </>
           )}
           </div>
