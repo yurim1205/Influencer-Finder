@@ -89,15 +89,23 @@ export default function ChannelPage({ params }: ChannelPageProps) {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
             {/* 왼쪽 썸네일 - 모바일에서 숨김 */}
-            <div className="hidden lg:block bg-white/80 backdrop-blur-sm rounded-3xl p-8 border border-gray-200">
+            <div className="hidden lg:block bg-white/80 backdrop-blur-sm rounded-3xl p-8 border border-gray-200
+            cursor-pointer hover:scale-105 transition-all duration-300">
               {channel.thumbnail ? (
+
+                  <a href={`https://www.youtube.com/channel/${channel.id}`}
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   >
                 <img
                   src={channel.thumbnail}
                   alt={channel.name}
                   className="w-full aspect-square object-cover rounded-2xl"
                 />
+                </a>
               ) : (
-                <div className="bg-gray-100 aspect-square flex items-center justify-center rounded-2xl">
+                <div className="bg-gray-100 aspect-square flex items-center justify-center rounded-2xl
+                ">
                   <div className="text-center">
                     <div className="text-9xl mb-4">🎥</div>
                     <p className="text-gray-500 text-lg font-medium">채널 썸네일</p>
