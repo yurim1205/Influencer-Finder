@@ -255,25 +255,25 @@ function SearchResults() {
 
           { /* 페이지네이션 더보기 버튼 */}
           {nextPageToken && !loading && (
-  <div className="flex justify-center mt-10">
-    {loadingMore ? (
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
-        <p className="text-sm text-gray-500">채널을 불러오는 중...</p>
-      </div>
-    ) : (
-      <button
-        onClick={handleLoadMore}
-        disabled={loadingMore}
-        className="px-8 py-3 bg-white/80 backdrop-blur-sm border border-gray-200 text-purple-600 font-semibold rounded-2xl 
-        hover:bg-purple-50 disabled:opacity-50 transition-all
-        shadow-lg shadow-purple-500/30"
-      >
-        더 보기
-      </button>
-    )}
-  </div>
-)}
+            <div className="flex justify-center mt-10">
+              {loadingMore ? (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
+                  <p className="text-sm text-gray-500">채널을 불러오는 중...</p>
+                </div>
+              ) : (
+                <button
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  className="px-8 py-3 bg-white/80 backdrop-blur-sm border border-gray-200 text-purple-600 font-semibold rounded-2xl 
+                  hover:bg-purple-50 disabled:opacity-50 transition-all
+                  shadow-lg shadow-purple-500/30"
+                >
+                  더 보기
+                </button>
+              )}
+            </div>
+          )}
           </>
           )}
           </div>
