@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -21,13 +21,12 @@ export default function SignupPage() {
           onClick={() => router.back()}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors w-fit"
         >
-          <ArrowLeft className="w-4 h-4" />
-          뒤로가기
+          <ChevronLeft className="w-8 h-8 text-gray-400"/>
         </button>
 
-        <p className="text-2xl font-bold text-gray-800">
+        {/* <p className="text-2xl font-bold text-gray-800">
           서비스 관련 문구
-        </p>
+        </p> */}
       </div>
 
       {/* 오른쪽 폼 영역 */}
