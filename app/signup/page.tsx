@@ -81,7 +81,8 @@ export default function SignupPage() {
           </div>
 
           <button
-            className="w-full mt-8 py-4 bg-[#B39CB5] text-white font-medium rounded-full hover:bg-purple-400 transition-colors"
+            className="w-full mt-8 py-4 bg-[#B39CB5] text-white font-medium rounded-full hover:scale-110 transition-transform
+            duration-300 cursor-pointer shadow-lg"
           >
             회원가입
           </button>

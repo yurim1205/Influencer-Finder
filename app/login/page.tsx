@@ -49,7 +49,9 @@ export default function LoginPage() {
             </div>
 
             <button
-            className="w-full mt-20 py-4 bg-[#B39CB5] text-white font-medium rounded-full hover:bg-purple-700 transition-colors"
+            className="w-full mt-20 py-4 bg-[#B39CB5] text-white font-medium rounded-full shadow-lg
+            hover:scale-110 transition-transform
+            duration-300 cursor-pointer"
             >
             로그인
             </button>
