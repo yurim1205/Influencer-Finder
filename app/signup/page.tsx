@@ -4,13 +4,45 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import {useForm} from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+const signupSchema = z.object({
+  name: z.string().min(1, '이름을 입력해주세요.'),
+  email: z.string().email('올바른 이메일 주소를 입력해주세요.'),
+  password: z.string().min(6, '비밀번호는 6자 이상 입력해주세요.'),
+  passwordConfirm: z.string().min(1, '비밀번호 확인을 입력해주세요.'),
+}).refine((data) => data.password === data.passwordConfirm, {
+  message: '비밀번호가 일치하지 않습니다.',
+  path: ['passwordConfirm'],
+});
+
+type SignupFormData = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
   const router = useRouter();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const { register, handleSubmit, formState: { errors } } = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+  });
+
+  const handleSignup = async (data: SignupFormData) => {
+    const { error } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: {
+        data: { name: data.name },
+      },
+    });
+  
+    if (error) {
+      alert('회원가입에 실패했습니다. 다시 시도해주세요.');
+      return;
+    }
+  
+    router.push('/signup/complete');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-50 to-blue-100 flex">
@@ -42,8 +74,7 @@ export default function SignupPage() {
               <label className="text-sm text-gray-800 mb-2 block">이름</label>
               <input
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                {...register('name')}
                 className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-200"
               />
             </div>
@@ -52,8 +83,7 @@ export default function SignupPage() {
               <label className="text-sm text-gray-800 mb-2 block">이메일</label>
               <input
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                {...register('email')}
                 className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-200"
               />
             </div>
@@ -62,27 +92,29 @@ export default function SignupPage() {
               <label className="text-sm text-gray-800 mb-2 block">비밀번호</label>
               <input
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register('password')}
                 className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-200"
               />
               <p className="text-xs text-gray-400 mt-1">6자 이상 입력해주세요</p>
             </div>
 
             <div>
-              <label className="text-sm text-gray-800 mb-2 block">비밀번호 확인</label>
+              <label className="text-sm text-gray-800 mb-2 block">비밀번호 확인</ label>
               <input
                 type="password"
-                value={passwordConfirm}
-                onChange={(e) => setPasswordConfirm(e.target.value)}
+                {...register('passwordConfirm')}
                 className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-200"
               />
             </div>
           </div>
 
+          {errors.passwordConfirm && (
+            <p className="text-red-400 text-sm mt-2 text-center">{errors.passwordConfirm.message}</p>
+          )}
+
           <button
-            className="w-full mt-8 py-4 bg-[#B39CB5] text-white font-medium rounded-full hover:scale-110 transition-transform
-            duration-300 cursor-pointer shadow-lg"
+            onClick={handleSubmit(handleSignup)}
+            className="w-full mt-8 py-4 bg-[#B39CB5] text-white font-medium rounded-full hover:scale-110 transition-transform duration-300 cursor-pointer shadow-lg disabled:opacity-50"
           >
             회원가입
           </button>
