@@ -113,13 +113,12 @@ export default function ChannelPage({ params }: ChannelPageProps) {
                 </div>
               )}
             </div>
-
         
         {/* 오른쪽 영역 */}
         <div className="flex flex-col gap-6">
             <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 border border-gray-200">
               <h2 className="text-base text-gray-700 mb-4">채널 설명</h2>
-              <p className="text-base text-gray-700 leading-relaxed text-xl font-bold text-black">
+              <p className="text-base text-gray-700 leading-relaxed text-xl font-semibold text-black line-clamp-5">
                 {channel.description || '채널 설명이 없습니다.'}
               </p>
             </div>
@@ -127,13 +126,13 @@ export default function ChannelPage({ params }: ChannelPageProps) {
               <div className="space-y-4">
                 <div>
                   <p className="text-lg text-gray-600">구독자</p>
-                  <p className="text-xl font-bold text-black">
+                  <p className="text-xl font-semibold text-black">
                     {formatCount(channel.subscribers || 0)}
                   </p>
                 </div>
                 <div>
                   <p className="text-lg text-gray-600">조회수 (최근 5개 영상 기준)</p>
-                  <p className="text-xl font-bold text-black">
+                  <p className="text-xl font-semibold text-black">
                   {latestVideos.length > 0 ? formatCount(avgViews || 0) : '이 채널은 영상 정보를 제공하지 않습니다'}
                   </p>
                 </div>
