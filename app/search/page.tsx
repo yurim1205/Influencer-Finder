@@ -15,30 +15,42 @@ function SearchResults() {
   const keyword = searchParams.get('keyword') || ''; // url 파라미터 이름 받는 부분
 
   // 상태 관리
-  const [channels, setChannels] = useState<Channel[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [searchResult, setSearchResult] = useState({
+    channels: [] as Channel[],
+    totalResults: 0,
+    nextPageToken: null as string | null,
+  });
+  
+  const [loadingState, setLoadingState] = useState({
+    loading: false,
+    loadingMore: false,
+  });
+  
   const [sortType, setSortType] = useState<'default' | 'subscribers' | 'latest'>('default');
   const [isOpen, setIsOpen] = useState(false);
-  const [nextPageToken, setNextPageToken] = useState<string | null>(null);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [totalResults, setTotalResults] = useState(0);
 
   useEffect(() => {
     async function fetchChannels() {
       if (!keyword) {
-        setChannels([]);
+        setSearchResult({
+          channels: [],
+          totalResults: 0,
+          nextPageToken: null,
+        });
         return;
       } 
 
       if (searchCache.has(keyword)) {
         const cached = searchCache.get(keyword)!;
-        setChannels(cached.channels);
-        setNextPageToken(cached.nextPageToken);
-        setTotalResults(cached.totalResults);
+        setSearchResult({
+          channels: cached.channels,
+          totalResults: cached.totalResults,
+          nextPageToken: cached.nextPageToken,
+        });
         return;
       }
 
-      setLoading(true);
+      setLoadingState({ loading: true, loadingMore: false });
 
       try {
         const result = await searchChannelsHybrid(keyword);
@@ -47,14 +59,20 @@ function SearchResults() {
           nextPageToken: result.nextPageToken, 
           totalResults: result.totalResults 
         });
-        setChannels(result.channels);
-        setNextPageToken(result.nextPageToken);
-        setTotalResults(result.totalResults);
+        setSearchResult({
+          channels: result.channels,
+          totalResults: result.totalResults,
+          nextPageToken: result.nextPageToken,
+        });
       } catch (error) {
         console.error('채널 검색 에러:', error);
-        setChannels([]);
+        setSearchResult({
+          channels: [],
+          totalResults: 0,
+          nextPageToken: null,
+        });
       } finally {
-        setLoading(false);
+        setLoadingState({ loading: false, loadingMore: false });
       }
     }
 
@@ -63,24 +81,26 @@ function SearchResults() {
 
   // 페이지네이션 더보기 함수
   const handleLoadMore = async () => {
-    if (!nextPageToken || loadingMore) return;
-    setLoadingMore(true);
+    if (!searchResult.nextPageToken || loadingState.loadingMore) return;
+    setLoadingState({ loading: true, loadingMore: true });
     try {
-      const result = await searchChannelsHybrid(keyword, nextPageToken);
-      const merged = [...channels, ...result.channels];
-      setChannels(merged);
-      setNextPageToken(result.nextPageToken);
-      setTotalResults(result.totalResults);
+      const result = await searchChannelsHybrid(keyword, searchResult.nextPageToken);
+      const merged = [...searchResult.channels, ...result.channels];
+      setSearchResult({
+        channels: merged,
+        totalResults: result.totalResults,
+        nextPageToken: result.nextPageToken,
+      });
       searchCache.set(keyword, { channels: merged, nextPageToken: result.nextPageToken, totalResults: result.totalResults });
     } catch (error) {
       console.error('더 보기 에러:', error);
     } finally {
-      setLoadingMore(false);
+      setLoadingState({ loading: false, loadingMore: false });
     }
   };
   
   // 정렬
-  const filteredChannels = [...channels]
+  const filteredChannels = [...searchResult.channels]
   .filter((channel, index, self) =>
      index === self.findIndex((ch) => ch.id === channel.id))
   .sort((a, b) => {
@@ -113,16 +133,16 @@ function SearchResults() {
                 {keyword ? `"${keyword}" 검색 결과` : '전체 채널'}
               </h1>
               <p className="text-gray-600 mt-2">
-                {loading ? (
+                {loadingState.loading ? (
                     <span className="text-gray-600">검색 중...</span>
                   ) : (
                     <span className="text-lg font-bold text-purple-600">
-                      총 {totalResults.toLocaleString()}개의 채널
+                      총 {searchResult.totalResults.toLocaleString()}개의 채널
                     </span>
                   )}
               </p>
 
-              {filteredChannels.length > 0 && !loading && (
+              {filteredChannels.length > 0 && !loadingState.loading && (
               <div className="relative mt-4">
                 <button
                   onClick={() => setIsOpen(!isOpen)}
@@ -163,18 +183,17 @@ function SearchResults() {
       </div>
 
         {/* 로딩 중 */}
-        {loading && channels.length === 0 && (
-  <div className="text-center py-20">
-    <div className="flex flex-col items-center gap-4">
-      <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
-      <p className="text-xl text-gray-600">채널을 검색하는 중...</p>
-    </div>
-  </div>
-)}
-
+        {loadingState.loading && searchResult.channels.length === 0 && (
+          <div className="text-center py-20">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
+              <p className="text-xl text-gray-600">채널을 검색하는 중...</p>
+            </div>
+          </div>
+        )}
 
                 {/* 검색 결과가 없을 때 */}
-                {!loading && keyword && filteredChannels.length === 0 && (
+                {!loadingState.loading && keyword && filteredChannels.length === 0 && (
                   <div className="text-center py-20">
                     <p className="text-2xl text-gray-500 mb-4">
                       "{keyword}"에 대한 검색 결과가 없습니다 😢
@@ -254,9 +273,9 @@ function SearchResults() {
           </div>
 
           { /* 페이지네이션 더보기 버튼 */}
-          {nextPageToken && !loading && (
+          {searchResult.nextPageToken && !loadingState.loading && (
             <div className="flex justify-center mt-10">
-              {loadingMore ? (
+              {loadingState.loadingMore ? (
                 <div className="flex flex-col items-center gap-3">
                   <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
                   <p className="text-sm text-gray-500">채널을 불러오는 중...</p>
@@ -264,7 +283,7 @@ function SearchResults() {
               ) : (
                 <button
                   onClick={handleLoadMore}
-                  disabled={loadingMore}
+                  disabled={loadingState.loadingMore}
                   className="px-8 py-3 bg-white/80 backdrop-blur-sm border border-gray-200 text-purple-600 font-semibold rounded-2xl 
                   hover:bg-purple-50 disabled:opacity-50 transition-all
                   shadow-lg shadow-purple-500/30"
