@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
@@ -10,7 +10,27 @@ export default function LoginPage() {
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-   
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    
+    const handleLogin = async () => {
+        setError('');
+        setLoading(true);
+
+        const {data, error} = await supabase.auth.signInWithPassword({
+            email,password,
+        });
+
+        setLoading(false);
+
+        if (error) {
+            setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+            return;
+        }
+
+        router.push('/'); // 로그인 성공 후 이동할 페이지
+    };
+    
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-50 to-blue-100 flex items-center justify-center px-6">
          
@@ -49,12 +69,16 @@ export default function LoginPage() {
                 </div>
             </div>
 
-            <button
-            className="w-full mt-20 py-4 bg-[#B39CB5] text-white font-medium rounded-full shadow-lg
-            hover:scale-110 transition-transform
-            duration-300 cursor-pointer"
-            >
-            로그인
+            <form onSubmit={(e) => {e.preventDefault(); handleLogin();}}></form>
+            <button 
+                    type="submit"
+                    onClick={handleLogin}
+                    disabled={loading}
+                    className="w-full mt-20 py-4 bg-[#B39CB5] text-white font-medium rounded-full shadow-lg
+                    hover:scale-110 transition-transform
+                    duration-300 cursor-pointer"
+                    >
+                {loading?'로딩 중':'로그인'}
             </button>
 
             <p className="text-center text-sm text-gray-400 mt-4">
