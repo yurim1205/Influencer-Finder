@@ -23,7 +23,7 @@ type SignupFormData = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
   const router = useRouter();
-  const { register, handleSubmit, formState: { errors }, control } = useForm<SignupFormData>({
+  const { register, handleSubmit, formState: { errors, isSubmitting }, control } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
     mode: 'onChange',
   });
@@ -33,6 +33,8 @@ export default function SignupPage() {
   const email = useWatch({ control, name: 'email' });
 
   const handleSignup = async (data: SignupFormData) => {
+
+    // 이 형태로 디비에 사용자 테이블이 저장됨 (따로 유저 테이블 생성 필요 x)
     const { error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
@@ -128,8 +130,8 @@ export default function SignupPage() {
                 className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-200"
               />
               <p className={`text-xs mt-1 ${
-                !errors.passwordConfirm 
-                  ? 'text-gray-400' 
+                !passwordConfirm
+                ? 'text-gray-400' 
                   : errors.passwordConfirm 
                     ? 'text-red-400' 
                     : 'text-green-500'
@@ -143,9 +145,19 @@ export default function SignupPage() {
 
           <button
             onClick={handleSubmit(handleSignup)}
-            className="w-full mt-8 py-4 bg-[#B39CB5] text-white font-medium rounded-full hover:scale-110 transition-transform duration-300 cursor-pointer shadow-lg disabled:opacity-50"
+            disabled={isSubmitting} // 회원가입 중복 요청 방지
+            className="w-full mt-8 py-4 bg-[#B39CB5] text-white font-medium rounded-full
+             hover:scale-110 transition-transform duration-300 cursor-pointer shadow-lg 
+             disabled:opacity-50"
           >
-            회원가입
+            {isSubmitting?(
+              <>
+              <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              <span>가입 중...</span>
+              </>
+            ):(
+              '회원가입'
+            )}
           </button>
 
           <p className="text-center text-sm text-gray-400 mt-4">
