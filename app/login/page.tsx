@@ -37,8 +37,6 @@ export default function LoginPage() {
             password: data.password,
         });
 
-        console.log(error);
-
         if (error) {
             setAuthError('이메일 또는 비밀번호가 올바르지 않습니다.');
             return;
