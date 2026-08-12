@@ -30,14 +30,12 @@ export default function Header() {
                 </>
       ) : (
         <>
-          <Link href="/login" className="
-          text-gray-700 font-medium hover:text-purple-600 transition-colors">
-            로그인
+          <Link href="/login" className="text-gray-500 font-semibold hover:text-purple-600 transition-colors">
+                로그인
           </Link>
 
-          <Link href="/signup" className="
-          text-gray-700 font-medium hover:text-purple-600 transition-colors">
-            회원가입
+          <Link href="/signup" className="text-gray-500 font-semibold hover:text-purple-800 transition-colors">
+                회원가입
           </Link>
         </>
       )}

@@ -28,7 +28,7 @@ export default function Home() {
     <Toaster position="top-center" />
     <Header />
       <main className="relative bg-gradient-to-br from-purple-100 via-pink-50 to-blue-100 min-h-screen flex flex-col items-center justify-center px-6">
-        <h1 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 text-transparent bg-clip-text mb-10 text-center">
+        <h1 className="text-md sm:text-3xl font-semibold text-gray-800 mb-10 text-center">
           키워드로 원하는 채널을 탐색해보세요 ✨
         </h1>
 
