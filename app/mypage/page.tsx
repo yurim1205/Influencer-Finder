@@ -80,7 +80,8 @@ export default function MyPage() {
           Influencer Finder
       </Link>
 
-        <div className="mt-6 bg-white/70 backdrop-blur-sm rounded-2xl p-4 border border-gray-200 mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="mt-6 bg-white/20 backdrop-blur-sm rounded-2xl p-4 border
+         border-gray-300 mb-6 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             {TABS.map((tab) => (
               <button
@@ -88,8 +89,8 @@ export default function MyPage() {
                 onClick={() => setActiveTab(tab)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   activeTab === tab
-                    ? 'bg-purple-600 text-white'
-                    : 'text-gray-600 hover:bg-purple-50'
+                    ? 'bg-[#6A4F6A] text-white'
+                    : 'text-gray-600 hover:bg-[#B39CB5]'
                 }`}
               >
                 {tab}
@@ -133,6 +134,11 @@ export default function MyPage() {
               placeholder="이름으로 검색해주세요"
               className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 w-56"
             />
+            <button className="px-4 py-2 bg-[#6A4F6A] text-white text-sm font-medium rounded-xl
+            hover:-translate-y-1 hover:shadow-lg transition-all duration-300
+            flex items-center gap-1 shadow-md shadow-gray-400/50">
+              + 항목 추가
+            </button>
           </div>
         </div>
 
