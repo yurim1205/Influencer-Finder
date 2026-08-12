@@ -76,11 +76,11 @@ export default function MyPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-50 to-blue-100 px-6 py-10">
       <div className="max-w-6xl mx-auto">
-      <Link href="/" className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 text-transparent bg-clip-text">
-  Influencer Finder
-</Link>
+      <Link href="/" className="text-xl font-bold text-gray-500">
+          Influencer Finder
+      </Link>
 
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 border border-gray-200 mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="mt-6 bg-white/70 backdrop-blur-sm rounded-2xl p-4 border border-gray-200 mb-6 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             {TABS.map((tab) => (
               <button
@@ -198,7 +198,7 @@ export default function MyPage() {
 
                 <p className="mt-1 text-sm text-gray-400 line-clamp-1">
                   <span className="font-medium text-gray-500">NOTE: </span>
-                  {item.note || '작성된 메모가 없습니다'}
+                  {item.note || '작성된 메모 없음'}
                 </p>
               </div>
             ))}
