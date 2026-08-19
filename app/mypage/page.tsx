@@ -1,7 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Header from '@/components/Header';
+import {useRouter} from 'next/navigation';
+import {useAuthStore} from '@/app/stores/useAuthStore';
 
 // 목업 데이터
 interface MyInfluencer {
@@ -59,6 +62,16 @@ export default function MyPage() {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
 
+  const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+  const loading = useAuthStore((state) => state.loading);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [loading, user, router]);
+
   // 탭 필터 → 검색 필터 → 정렬 순으로 처리
   const filteredData = mockData
     .filter((item) => activeTab === '전체' || item.contactStatus === activeTab)
@@ -73,8 +86,13 @@ export default function MyPage() {
     return num.toLocaleString();
   };
 
+  if (loading || !user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-50 to-blue-100 px-6 py-10">
+      <Header />
       <div className="max-w-6xl mx-auto">
       <Link href="/" className="text-xl font-bold text-gray-500">
           Influencer Finder
