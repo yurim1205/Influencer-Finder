@@ -5,47 +5,22 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import {useRouter} from 'next/navigation';
 import {useAuthStore} from '@/app/stores/useAuthStore';
+import { supabase } from '@/lib/supabase';
+import Modal from '@/components/Modal';
 
-// 목업 데이터
 interface MyInfluencer {
   id: string;
   name: string;
   gender: 'M' | 'F';
   subscribers: number;
-  avgViews: number;
+  avg_views: number;
   description: string;
-  contactEmail: string;
-  contactDate: string;
-  contactStatus: '미컨택' | '컨택' | '지원';
+  contact_point: string;
+  contact_email: string;
+  contact_date: string;
+  contact_status: '미컨택' | '컨택' | '지원';
   note: string;
 }
-
-const mockData: MyInfluencer[] = [
-  {
-    id: '1',
-    name: '귀곰',
-    gender: 'M',
-    subscribers: 787000,
-    avgViews: 204000,
-    description: "곰 모양 탈을 쓴 유튜버 '귀찮은 곰'이 가전제품을 실생활의 경험에 근거하여 꼼꼼하게 분석하며 소비자의 궁금증을 해소해주는 채널입니다.",
-    contactEmail: 'companyssul@gmail.com',
-    contactDate: '2026-02-20',
-    contactStatus: '컨택',
-    note: '2월에 협찬 문의함, 3월 초 답변 예정',
-  },
-  {
-    id: '2',
-    name: 'UnderKG',
-    gender: 'M',
-    subscribers: 755000,
-    avgViews: 203000,
-    description: '노트북, 핸드폰, 게임기, 카메라 등 다양한 스마트기기를 일정 기간 동안 실사용한 후기를 중심으로 리뷰하는 채널입니다.',
-    contactEmail: 'underkg@gmail.com',
-    contactDate: '',
-    contactStatus: '미컨택',
-    note: '',
-  },
-];
 
 const TABS = ['전체', '미컨택', '컨택', '지원'] as const;
 type TabType = (typeof TABS)[number];
@@ -61,6 +36,9 @@ export default function MyPage() {
   const [sortType, setSortType] = useState<SortType>('subscribers');
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [influencers, setInfluencers] = useState<MyInfluencer[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
@@ -72,13 +50,35 @@ export default function MyPage() {
     }
   }, [loading, user, router]);
 
+  useEffect(() => {
+    async function fetchInfluencers() {
+      if (!user) return;
+
+      const {data, error} = await supabase.
+        from('influencers')
+        .select('*')
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('데이터 조회 오류', error);
+      } else {
+        setInfluencers(data|| []);
+      }
+      setDataLoading(false);
+    }
+    
+    if (user) {
+      fetchInfluencers();
+    }
+  }, [user]);
+
   // 탭 필터 → 검색 필터 → 정렬 순으로 처리
-  const filteredData = mockData
-    .filter((item) => activeTab === '전체' || item.contactStatus === activeTab)
+  const filteredData = influencers
+    .filter((item) => activeTab === '전체' || item.contact_status === activeTab)
     .filter((item) => item.name.toLowerCase().includes(searchKeyword.toLowerCase()))
     .sort((a, b) => {
       if (sortType === 'subscribers') return b.subscribers - a.subscribers;
-      return b.avgViews - a.avgViews;
+      return b.avg_views - a.avg_views;
     });
 
   const formatCount = (num: number) => {
@@ -150,13 +150,19 @@ export default function MyPage() {
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
               placeholder="이름으로 검색해주세요"
-              className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 w-56"
+              className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 
+              focus:ring-purple-200 w-56"
             />
-            <button className="px-4 py-2 bg-[#6A4F6A] text-white text-sm font-medium rounded-xl
+            
+            {/******* 항목 추가 버튼 ********/}
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="px-4 py-2 bg-[#6A4F6A] text-white text-sm font-medium rounded-xl
             hover:-translate-y-1 hover:shadow-lg transition-all duration-300
             flex items-center gap-1 shadow-md shadow-gray-400/50">
               + 항목 추가
             </button>
+
           </div>
         </div>
 
@@ -192,25 +198,25 @@ export default function MyPage() {
 
                   <span className="text-sm text-gray-500">
                     <span className="md:hidden">평균조회수: </span>
-                    {formatCount(item.avgViews)}
+                    {formatCount(item.avg_views)}
                   </span>
 
                   <span className="text-sm text-gray-500 truncate">
                     <span className="md:hidden">이메일: </span>
-                    {item.contactEmail || '-'}
+                    {item.contact_email || '-'}
                   </span>
 
                   <span>
                     <span
                       className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                        item.contactStatus === '지원'
+                        item.contact_status === '지원'
                           ? 'bg-blue-100 text-blue-700'
-                          : item.contactStatus === '컨택'
+                          : item.contact_status === '컨택'
                           ? 'bg-green-100 text-green-700'
                           : 'bg-gray-100 text-gray-600'
                       }`}
                     >
-                      {item.contactStatus}
+                      {item.contact_status}
                     </span>
                   </span>
                 </div>
@@ -229,6 +235,11 @@ export default function MyPage() {
           </div>
         )}
       </div>
+
+      <Modal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+      />
     </div>
   );
 }
