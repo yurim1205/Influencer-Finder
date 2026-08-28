@@ -54,8 +54,8 @@ export default function MyPage() {
     async function fetchInfluencers() {
       if (!user) return;
 
-      const {data, error} = await supabase.
-        from('influencers')
+      const {data, error} = await supabase
+        .from('my_influencers')
         .select('*')
         .eq('user_id', user.id);
 

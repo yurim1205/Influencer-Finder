@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
+import {supabase} from '@/lib/supabase';
+import { useAuthStore } from '@/app/stores/useAuthStore';
 
 interface ModalProps {
     isOpen: boolean;
@@ -20,6 +22,9 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
         email: '',
     });
 
+    const user = useAuthStore((state)=> state.user);
+    const [isSaving, setIsSaving] = useState(false);
+
      const inputClass =
       'h-[42px] rounded-full border border-[#c6c1c1] bg-[#f5f3f6] px-5 text-[16px] text-black outline-none focus:border-[#4B5563] transition-all';
      const labelClass = 'text-[16px] font-medium text-[#717070]';
@@ -36,6 +41,41 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
     }, [isOpen, onClose]);
 
     if (!isOpen) return null;
+
+    const handleSave = async()=> {
+        if (!user) return;
+
+        if (!formData.name || !formData.contactHistory) {
+            alert('이름과 컨택 이력은 필수 입력값입니다.');
+            return;
+        }
+
+        setIsSaving(true);
+
+        const {error} = await supabase.from('my_influencers').insert({
+            user_id: user.id,
+            name: formData.name,
+            gender: formData.gender,
+            subscribers: Number(formData.subscribers) || 0,
+            avg_views: Number(formData.avgViews) || 0,
+            description: formData.intro,
+            contact_point: formData.contactHistory,
+            contact_email: formData.email,
+            contact_date: formData.contactDate,
+            contact_status: '미컨택',
+            note: '',
+        });
+
+        setIsSaving(false);
+
+        if (error) {
+            console.error('저장 오류:', error);
+            alert('저장에 실패했습니다.');
+            return;
+        }
+
+        onClose();
+    }
 
     return (
         <div
@@ -188,10 +228,12 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
                     </button>
                     <button
                         type="button"
+                        onClick={handleSave}
+                        disabled={isSaving}
                         className="flex h-[53px] w-[118px] items-center justify-center rounded-full bg-[#6a4f6a] text-[21px] 
                         font-medium text-white hover:cursor-pointer shadow-[0px_4px_10px_0px_#eaeaea]"
                     >
-                        저장
+                        {isSaving ? '저장 중...' : '저장'}
                     </button>
                 </div>
             </div>
