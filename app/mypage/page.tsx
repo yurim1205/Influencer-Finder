@@ -17,8 +17,8 @@ interface MyInfluencer {
   description: string;
   contact_point: string;
   contact_email: string;
-  contact_date: string;
-  contact_status: '미컨택' | '컨택' | '지원';
+  contact_note: string;     // 컨택 시기
+  contact_status: '미컨택' | '컨택' | '지원'; // 컨택 이력
   note: string;
 }
 
@@ -50,9 +50,8 @@ export default function MyPage() {
     }
   }, [loading, user, router]);
 
-  useEffect(() => {
-    async function fetchInfluencers() {
-      if (!user) return;
+    const fetchInfluencers = async ()=> {
+      if (!user) return;     // 사용자가 아니면 그냥 끝냄
 
       const {data, error} = await supabase
         .from('my_influencers')
@@ -65,11 +64,12 @@ export default function MyPage() {
         setInfluencers(data|| []);
       }
       setDataLoading(false);
-    }
+    };
     
-    if (user) {
-      fetchInfluencers();
-    }
+    useEffect(()=> {
+      if (user) {
+        fetchInfluencers();
+      }
   }, [user]);
 
   // 탭 필터 → 검색 필터 → 정렬 순으로 처리
@@ -177,7 +177,7 @@ export default function MyPage() {
               <span>성별</span>
               <span>구독자수</span>
               <span>평균조회수</span>
-              <span>이메일</span>
+              <span>컨택 포인트</span>
               <span>컨택 이력</span>
             </div>
 
@@ -202,7 +202,7 @@ export default function MyPage() {
                   </span>
 
                   <span className="text-sm text-gray-500 truncate">
-                    <span className="md:hidden">이메일: </span>
+                    <span className="md:hidden">컨택 포인트: </span>
                     {item.contact_email || '-'}
                   </span>
 
@@ -222,7 +222,7 @@ export default function MyPage() {
                 </div>
 
                 <p className="mt-3 text-sm text-gray-600 line-clamp-2">
-                  <span className="font-medium text-gray-700">소개: </span>
+                  <span className="font-medium text-gray-700">소개 및 대표 콘텐츠: </span>
                   {item.description || '등록된 소개가 없습니다'}
                 </p>
 
@@ -239,6 +239,7 @@ export default function MyPage() {
       <Modal 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
+          onSaved={fetchInfluencers}
       />
     </div>
   );
