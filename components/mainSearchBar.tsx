@@ -48,13 +48,13 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
         className="
           absolute right-4
           w-10 h-10
-          bg-purple-600
+          bg-[#6A4F6A]
           rounded-2xl
           flex items-center justify-center
-          hover:bg-purple-700
+          hover:-translate-y-1 hover:shadow-lg transition-all duration-300
           active:bg-purple-800
           transition-all duration-200
-          shadow-lg shadow-purple-500/30
+          shadow-lg shadow-black/30
         "
       >
         <Search className="w-5 h-5 text-white" />
