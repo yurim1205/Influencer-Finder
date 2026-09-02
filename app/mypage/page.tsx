@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import {useRouter} from 'next/navigation';
 import {useAuthStore} from '@/app/stores/useAuthStore';
 import { supabase } from '@/lib/supabase';
 import Modal from '@/components/Modal';
+import {createPortal} from 'react-dom';
 
 interface MyInfluencer {
   id: string;
@@ -39,6 +40,8 @@ export default function MyPage() {
   const [influencers, setInfluencers] = useState<MyInfluencer[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
+  const sortButtonRef = useRef<HTMLButtonElement>(null);
 
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
@@ -71,6 +74,29 @@ export default function MyPage() {
         fetchInfluencers();
       }
   }, [user]);
+
+  useEffect(() => {
+    if (!isSortOpen || !sortButtonRef.current) return;
+
+    const rect = sortButtonRef.current.getBoundingClientRect();
+    setDropdownPosition({ top: rect.bottom + 4, left: rect.left });
+  }, [isSortOpen]);
+
+  useEffect(()=> {
+    if (!isSortOpen) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        sortButtonRef.current &&
+        !sortButtonRef.current.contains(e.target as Node)
+      ) {
+        setIsSortOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isSortOpen]);
 
   // 탭 필터 → 검색 필터 → 정렬 순으로 처리
   const filteredData = influencers
@@ -118,8 +144,9 @@ export default function MyPage() {
 
           <div className="flex items-center gap-3">
             {/* 정렬 드롭다운 */}
-            <div className="relative">
+            <div className="relative z-0">
               <button
+                ref={sortButtonRef}
                 onClick={() => setIsSortOpen(!isSortOpen)}
                 className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-600 flex items-center gap-2"
               >
@@ -127,23 +154,27 @@ export default function MyPage() {
                 <span>{isSortOpen ? '▲' : '▼'}</span>
               </button>
 
-              {isSortOpen && (
-                <div className="absolute top-full right-0 mt-1 bg-white rounded-xl shadow-lg border border-gray-200 z-50 w-32">
-                  {SORT_OPTIONS.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => {
-                        setSortType(option.value);
-                        setIsSortOpen(false);
-                      }}
-                      className="w-full px-4 py-3 text-left text-sm hover:bg-purple-50 first:rounded-t-xl last:rounded-b-xl"
+              {isSortOpen && createPortal(
+                    <div
+                        className="fixed z-[9999] bg-white rounded-xl shadow-lg border border-gray-200 w-32"
+                        style={{ top: dropdownPosition.top, left: dropdownPosition.left }}
                     >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+                              {SORT_OPTIONS.map((option) => (
+                              <button
+                                  key={option.value}
+                                  onClick={() => {
+                                      setSortType(option.value);
+                                      setIsSortOpen(false);
+                                  }}
+                                  className="w-full px-4 py-3 text-left text-sm hover:bg-purple-50 first:rounded-t-xl last:rounded-b-xl"
+                              >
+                                  {option.label}
+                              </button>
+                          ))}
+                      </div>,
+                      document.body
+                  )}
+              </div>
 
             <input
               type="text"

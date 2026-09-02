@@ -43,10 +43,11 @@ export default function Modal({ isOpen, onClose, onSaved }: ModalProps) {
 
     if (!isOpen) return null;
 
+    
     const handleSave = async()=> {
         if (!user) return;
 
-        if (!formData.name || !formData.contactStatus) {
+        if (!formData.name) {
             alert('이름은 필수 입력값입니다.');
             return;
         }
