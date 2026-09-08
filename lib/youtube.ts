@@ -119,12 +119,14 @@ export function convertToChannel(youtubeChannel: YoutubeChannelData): Channel {
   };
 }
 
-export async function searchChannelsByVideo(query: string) {
+// 이 함수에서도 pageToken을 넘길 수 있도록 수정
+export async function searchChannelsByVideo(query: string, pageToken: string|null = null) {
   try {
     const response = await fetch(
       `${YOUTUBE_API_BASE_URL}/search?` +
       `part=snippet&type=video&q=${encodeURIComponent(query)}&` +
-      `maxResults=12&key=${YOUTUBE_API_KEY}`
+      `maxResults=12&key=${YOUTUBE_API_KEY}` +
+      (pageToken ? `&pageToken=${pageToken}` : '')     // 여기서 토큰 사용
     );
 
     if (!response.ok) {
@@ -164,11 +166,15 @@ export async function searchChannelsByVideo(query: string) {
     });
 
   const channels = await Promise.all(channelPromises);
-  return channels.filter(ch => ch !== null);
+  return {
+    channels: channels.filter(ch => ch !== null),
+    nextPageToken: data.nextPageToken || null,
+    totalResults: data.pageInfo?.totalResults || 0,
+  }
 } catch (error) {
   console.error('영상 검색 에러:', error);
-  return [];
-}
+  return { channels: [], nextPageToken: null, totalResults: 0 };
+  }
 }
 
 export async function searchChannelsHybrid(
@@ -176,14 +182,15 @@ export async function searchChannelsHybrid(
   pageToken: string|null = null
 ): Promise<SearchResult> {
   try {
+    // 1. pageToken을 넘김
     const { items: channelSearchResults, nextPageToken, totalResults } = await searchChannels(query, pageToken);
 
-    // 영상 제목 검색
+    // 2. searchChannelsByVideo엔 pageToken을 넘기기 않고 query만 넘김
    const videoResults = await searchChannelsByVideo(query);
 
    const channelmap = new Map<string, Channel>();
 
-   videoResults.forEach((channel: Channel) => {
+   videoResults.channels.forEach((channel: Channel) => {
     channelmap.set(channel.id, channel);
    });
 

@@ -6,7 +6,7 @@ import Header from '@/components/Header';
 import {useRouter} from 'next/navigation';
 import {useAuthStore} from '@/app/stores/useAuthStore';
 import { supabase } from '@/lib/supabase';
-import Modal from '@/components/Modal';
+import Modal from '@/components/myPageModal';
 import {createPortal} from 'react-dom';
 
 interface MyInfluencer {
