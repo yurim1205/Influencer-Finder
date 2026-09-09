@@ -18,7 +18,8 @@ export interface Channel {
 
 export interface SearchResult {
   channels: Channel[];
-  nextPageToken: string|null;
+  nextChannelPageToken: string|null;
+  nextVideoPageToken: string|null;
   totalResults: number;
 }
 
@@ -67,19 +68,20 @@ export interface YoutubeSearchItem {
   };
 }
 
-// 채널 검색
+// 채널 검색 함수
 export async function searchChannels(query: string, pageToken: string|null = null) {
   const response = await fetch(
     `${YOUTUBE_API_BASE_URL}/search?` +
     `part=snippet&type=channel&q=${encodeURIComponent(query)}&` +
     `maxResults=12&key=${YOUTUBE_API_KEY}` +
-    (pageToken ? `&pageToken=${pageToken}` : '')
+    (pageToken ? `&pageToken=${pageToken}` : '')       // 페이지 토큰 사용
   );
+
   const data = await response.json();
   return { 
     items: data.items || [],
     nextPageToken: data.nextPageToken || null,
-    totalResults: data.pageInfo?.totalResults || 0,
+    totalResults: data.pageInfo?.totalResults || 0
   };
 }
 
@@ -168,7 +170,7 @@ export async function searchChannelsByVideo(query: string, pageToken: string|nul
   const channels = await Promise.all(channelPromises);
   return {
     channels: channels.filter(ch => ch !== null),
-    nextPageToken: data.nextPageToken || null,
+    nextPageToken: data.nextPageToken || null,         // 다음 페이지 토큰 돌려줌
     totalResults: data.pageInfo?.totalResults || 0,
   }
 } catch (error) {
@@ -179,18 +181,21 @@ export async function searchChannelsByVideo(query: string, pageToken: string|nul
 
 export async function searchChannelsHybrid(
   query: string,
-  pageToken: string|null = null
+  channelPageToken: string|null = null,
+  videoPageToken: string|null = null,
 ): Promise<SearchResult> {
   try {
-    // 1. pageToken을 넘김
-    const { items: channelSearchResults, nextPageToken, totalResults } = await searchChannels(query, pageToken);
+    // 1. 채널명 검색 - channelPageToken으로 다음 페이지 요청
+    const { items: channelSearchResults, nextPageToken: nextChannelPageToken, totalResults } = 
+      await searchChannels(query, channelPageToken);
 
-    // 2. searchChannelsByVideo엔 pageToken을 넘기기 않고 query만 넘김
-   const videoResults = await searchChannelsByVideo(query);
+    // 2. 영상 제목 검색 - videoPageToken으로 다음 페이지 요청
+   const {channels: videoResults, nextPageToken: nextVideoPageToken} = 
+    await searchChannelsByVideo(query, videoPageToken)
 
    const channelmap = new Map<string, Channel>();
 
-   videoResults.channels.forEach((channel: Channel) => {
+   videoResults.forEach((channel: Channel) => {
     channelmap.set(channel.id, channel);
    });
 
@@ -215,12 +220,13 @@ export async function searchChannelsHybrid(
 
     return {
       channels: Array.from(channelmap.values()).slice(0, 10),
-      nextPageToken,
+      nextChannelPageToken,
+      nextVideoPageToken,
       totalResults,
     };
   } catch (error) {
     console.error('하이브리드 검색 에러:', error);
-    return { channels: [], nextPageToken: null, totalResults: 0 };
+    return { channels: [], nextChannelPageToken: null, nextVideoPageToken: null, totalResults: 0 };
   }
 }
 
